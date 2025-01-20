@@ -71,6 +71,38 @@ async function run() {
       res.send(result);
     });
 
+    // ----------------------Update Item----------------------------
+    app.get("/DonationUp/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await recipientCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.put("/DonationUp/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: req.body,
+      };
+
+      const result = await recipientCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+
+      res.send(result);
+    });
+    // ----------------------------------------Details---------------------------------------
+    app.get("/details/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await recipientCollection.findOne(query);
+      res.send(result);
+    });
+
     //?----------------------------------------------------------------------------------------
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
