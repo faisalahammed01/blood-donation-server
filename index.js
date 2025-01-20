@@ -29,6 +29,7 @@ async function run() {
 
     const userCollection = client.db("BloodDB").collection("users");
     const recipientCollection = client.db("BloodDB").collection("recipient");
+    const donorCollection = client.db("BloodDB").collection("donor");
 
     //!----------------------------Users-AUTH----------------------------------
     app.post("/users", async (req, res) => {
@@ -54,6 +55,13 @@ async function run() {
         .find(query)
         .sort({ date: -1 })
         .limit(3);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.get("/MyDonations", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = recipientCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -95,6 +103,24 @@ async function run() {
 
       res.send(result);
     });
+
+    app.put("/DonationUpStatus/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: { status: "inprogress" },
+      };
+
+      const result = await recipientCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+
+      res.send(result);
+    });
+
     // ----------------------------------------Details---------------------------------------
     app.get("/details/:id", async (req, res) => {
       const id = req.params.id;
@@ -102,7 +128,12 @@ async function run() {
       const result = await recipientCollection.findOne(query);
       res.send(result);
     });
-
+    // !--------------------------Donor-AND--Recipient----------------------------
+    app.post("/donor", async (req, res) => {
+      const user = req.body;
+      const result = await donorCollection.insertOne(user);
+      res.send(result);
+    });
     //?----------------------------------------------------------------------------------------
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
