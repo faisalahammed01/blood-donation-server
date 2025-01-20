@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
@@ -25,11 +25,12 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    //!------------------------DB__COLLECTION--------------------------
+    //!------------------------DB__COLLECTION-------------------------------
 
     const userCollection = client.db("BloodDB").collection("users");
+    const recipientCollection = client.db("BloodDB").collection("recipient");
 
-    //!----------------------------Users----------------------------------
+    //!----------------------------Users-AUTH----------------------------------
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
@@ -39,7 +40,38 @@ async function run() {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
+    // !------------------------------Recipient-NEED-BLOOD--------------------------
 
+    app.post("/recipient", async (req, res) => {
+      const recipientUser = req.body;
+      const result = await recipientCollection.insertOne(recipientUser);
+      res.send(result);
+    });
+    app.get("/MyDonation", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = recipientCollection
+        .find(query)
+        .sort({ date: -1 })
+        .limit(3);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    //  ----------------------Delete Item---------------------
+
+    app.get("/donationDelete", async (req, res) => {
+      const cursor = recipientCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.delete("/donationDelete/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await recipientCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //?----------------------------------------------------------------------------------------
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -51,6 +83,8 @@ async function run() {
   }
 }
 run().catch(console.dir);
+
+// ?----------------------------------------------------------------------------------------------
 
 app.get("/", (req, res) => {
   res.send("Hello World");
