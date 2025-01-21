@@ -120,6 +120,15 @@ async function run() {
 
       res.send(result);
     });
+    // ----------------------Update Donation Status----------------------------
+    app.put("/upDonationStatus/:id", async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = { $set: { status } };
+      const result = await recipientCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
 
     // ----------------------------------------Details---------------------------------------
     app.get("/details/:id", async (req, res) => {
