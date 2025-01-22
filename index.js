@@ -48,6 +48,7 @@ async function run() {
       const result = await recipientCollection.insertOne(recipientUser);
       res.send(result);
     });
+    //------- limit----
     app.get("/MyDonation", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
@@ -63,6 +64,11 @@ async function run() {
       const query = { email: email };
       const cursor = recipientCollection.find(query);
       const result = await cursor.toArray();
+      res.send(result);
+    });
+    // all-get
+    app.get("/DonationRequrest", async (req, res) => {
+      const result = await recipientCollection.find().toArray();
       res.send(result);
     });
     //  ----------------------Delete Item---------------------
@@ -86,7 +92,7 @@ async function run() {
       const result = await recipientCollection.findOne(query);
       res.send(result);
     });
-
+    //  ----------------------Update Donation Status----------------------------
     app.put("/DonationUp/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -103,7 +109,7 @@ async function run() {
 
       res.send(result);
     });
-
+    //  update-Status---------------------
     app.put("/DonationUpStatus/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -137,12 +143,23 @@ async function run() {
       const result = await recipientCollection.findOne(query);
       res.send(result);
     });
-    // !--------------------------Donor-AND--Recipient----------------------------
+    // !--------------------------Donor------------------------------------
     app.post("/donor", async (req, res) => {
       const user = req.body;
       const result = await donorCollection.insertOne(user);
       res.send(result);
     });
+    // !----------------------------------Search Donor--------------------------------
+    app.get("/searchDonor", async (req, res) => {
+      const { District, Upazila, Blood } = req.query;
+      const query = {};
+      if (District) query.District = District;
+      if (Upazila) query.Upazila = Upazila;
+      if (Blood) query.Blood = Blood;
+      const donors = await donorCollection.find(query).toArray();
+      res.json(donors);
+    });
+
     //?----------------------------------------------------------------------------------------
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
