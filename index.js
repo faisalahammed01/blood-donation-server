@@ -54,7 +54,17 @@ async function run() {
       res.send(result);
     });
     // !---make-Volunteer-----***
-
+    app.patch("/users/volunteer/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: "volunteer",
+        },
+      };
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
     // !------------------------------Recipient-NEED-BLOOD--------------------------
 
     app.post("/recipient", async (req, res) => {
