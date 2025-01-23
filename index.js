@@ -32,6 +32,7 @@ async function run() {
     const recipientCollection = client.db("BloodDB").collection("recipient");
     const donorCollection = client.db("BloodDB").collection("donor");
     const fundCollection = client.db("BloodDB").collection("fund");
+    const blogCollection = client.db("BloodDB").collection("blog");
     //? --------------JWT---------------
     app.post("/jwt", async (req, res) => {
       const user = req.body;
@@ -42,7 +43,6 @@ async function run() {
     });
     // ---middleware---------
     const verifyToken = (req, res, next) => {
-      console.log("verify token", req.headers.authorization);
       if (!req.headers.authorization) {
         return res.status(401).send({ message: "unauthorized access" });
       }
@@ -55,6 +55,22 @@ async function run() {
         next();
       });
     };
+    // !----------------------------Blog----------------------------------
+    app.post("/blog", async (req, res) => {
+      const blog = req.body;
+      const result = await blogCollection.insertOne(blog);
+      res.send(result);
+    });
+    // all-get-admin
+    app.get("/blog", async (req, res) => {
+      const result = await blogCollection.find().toArray();
+      res.send(result);
+    });
+    // all-get-volunteer
+    app.get("/blogs", async (req, res) => {
+      const result = await blogCollection.find().toArray();
+      res.send(result);
+    });
     //!----------------------------Users-AUTH----------------------------------
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -146,6 +162,10 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    app.get("/DonationRequrestAdmin", async (req, res) => {
+      const result = await recipientCollection.find().toArray();
+      res.send(result);
+    });
     // all-get
     app.get("/DonationRequrest", async (req, res) => {
       const result = await recipientCollection.find().toArray();
@@ -156,13 +176,25 @@ async function run() {
       res.send(result);
     });
     //  ----------------------Delete Item---------------------
-
+    //  --my-donation-delete---
     app.get("/donationDelete", async (req, res) => {
       const cursor = recipientCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
     app.delete("/donationDelete/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await recipientCollection.deleteOne(query);
+      res.send(result);
+    });
+    // -----admin-delete-----
+    app.get("/donationDeletee", async (req, res) => {
+      const cursor = recipientCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.delete("/donationDeletee/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await recipientCollection.deleteOne(query);
@@ -212,6 +244,15 @@ async function run() {
     });
     // ----------------------Update Donation Status----------------------------
     app.put("/upDonationStatus/:id", async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = { $set: { status } };
+      const result = await recipientCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+    // admin-update-Status---------------------
+    app.put("/upDonationStatuss/:id", async (req, res) => {
       const id = req.params.id;
       const { status } = req.body;
       const filter = { _id: new ObjectId(id) };
