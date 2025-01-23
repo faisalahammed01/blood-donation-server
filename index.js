@@ -31,6 +31,7 @@ async function run() {
     const userCollection = client.db("BloodDB").collection("users");
     const recipientCollection = client.db("BloodDB").collection("recipient");
     const donorCollection = client.db("BloodDB").collection("donor");
+    const fundCollection = client.db("BloodDB").collection("fund");
     //? --------------JWT---------------
     app.post("/jwt", async (req, res) => {
       const user = req.body;
@@ -150,6 +151,10 @@ async function run() {
       const result = await recipientCollection.find().toArray();
       res.send(result);
     });
+    app.get("/DonationRequrests", async (req, res) => {
+      const result = await recipientCollection.find().toArray();
+      res.send(result);
+    });
     //  ----------------------Delete Item---------------------
 
     app.get("/donationDelete", async (req, res) => {
@@ -228,6 +233,12 @@ async function run() {
       const result = await donorCollection.insertOne(user);
       res.send(result);
     });
+
+    // all-get
+    app.get("/donor", async (req, res) => {
+      const result = await donorCollection.find().toArray();
+      res.send(result);
+    });
     // !----------------------------------Search Donor--------------------------------
     app.get("/searchDonor", async (req, res) => {
       const { District, Upazila, Blood } = req.query;
@@ -237,6 +248,17 @@ async function run() {
       if (Blood) query.Blood = Blood;
       const donors = await donorCollection.find(query).toArray();
       res.json(donors);
+    });
+    // !--------------------------fund------------------------------------
+    app.post("/fund", async (req, res) => {
+      const fund = req.body;
+      const result = await fundCollection.insertOne(fund);
+      res.send(result);
+    });
+    // all-get
+    app.get("/fund", async (req, res) => {
+      const result = await fundCollection.find().toArray();
+      res.send(result);
     });
 
     //?----------------------------------------------------------------------------------------
