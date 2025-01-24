@@ -71,6 +71,11 @@ async function run() {
       const result = await blogCollection.find().toArray();
       res.send(result);
     });
+    // ----public-get
+    app.get("/AllBlog", async (req, res) => {
+      const result = await blogCollection.find().toArray();
+      res.send(result);
+    });
     //!----------------------------Users-AUTH----------------------------------
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -97,13 +102,32 @@ async function run() {
       }
       res.send({ admin });
     });
-    // -------------------
+    // ---------admin-role----------
     app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
           role: "admin",
+        },
+      };
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+    // user-profile
+    app.patch("/users/profile/:email", async (req, res) => {
+      const email = req.params.email;
+      const Data = req.body;
+      console.log(Data);
+
+      const filter = { email: email };
+      const updatedDoc = {
+        $set: {
+          name: Data.name,
+          image: Data.image,
+          bloodGroup: Data.bloodGroup,
+          district: Data.district,
+          upazila: Data.upazila,
         },
       };
       const result = await userCollection.updateOne(filter, updatedDoc);
@@ -206,6 +230,13 @@ async function run() {
       const result = await recipientCollection.deleteOne(query);
       res.send(result);
     });
+    // blog-delete
+    app.delete("/blogs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await blogCollection.deleteOne(query);
+      res.send(result);
+    });
 
     // ----------------------Update Item----------------------------
     app.get("/DonationUp/:id", async (req, res) => {
@@ -266,12 +297,29 @@ async function run() {
       const result = await recipientCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
+    // blog-update-status
+    app.put("/blogStatus/:id", async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = { $set: { status } };
+      const result = await blogCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
 
     // ----------------------------------------Details---------------------------------------
+    //--recipient-details---
     app.get("/details/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await recipientCollection.findOne(query);
+      res.send(result);
+    });
+    // blog-details
+    app.get("/seeMore/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await blogCollection.findOne(query);
       res.send(result);
     });
     // !--------------------------Donor------------------------------------
