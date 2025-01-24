@@ -7,7 +7,16 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 
 //!----------- Middleware----------------
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://blood-donation-69994.web.app",
+      "https://blood-donation-69994.firebaseapp.com",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.h13ev.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -24,7 +33,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     //!------------------------DB__COLLECTION-------------------------------
 
@@ -37,7 +46,7 @@ async function run() {
     app.post("/jwt", async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "5h",
       });
       res.send({ token });
     });
@@ -102,6 +111,10 @@ async function run() {
       }
       res.send({ admin });
     });
+    app.get("/user/Block", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
     // ---------admin-role----------
     app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
@@ -118,8 +131,6 @@ async function run() {
     app.patch("/users/profile/:email", async (req, res) => {
       const email = req.params.email;
       const Data = req.body;
-      console.log(Data);
-
       const filter = { email: email };
       const updatedDoc = {
         $set: {
@@ -306,6 +317,15 @@ async function run() {
       const result = await blogCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
+    // user-blog-and-unblock
+    app.put("/userStatus/:id", async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = { $set: { status } };
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
 
     // ----------------------------------------Details---------------------------------------
     //--recipient-details---
@@ -358,10 +378,10 @@ async function run() {
 
     //?----------------------------------------------------------------------------------------
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
