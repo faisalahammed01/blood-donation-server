@@ -162,7 +162,13 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    // get-all-admin
     app.get("/DonationRequrestAdmin", async (req, res) => {
+      const result = await recipientCollection.find().toArray();
+      res.send(result);
+    });
+    // get-all-VolunteerRequest
+    app.get("/DonationVolunteerRequest", async (req, res) => {
       const result = await recipientCollection.find().toArray();
       res.send(result);
     });
