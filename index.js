@@ -42,6 +42,7 @@ async function run() {
     const donorCollection = client.db("BloodDB").collection("donor");
     const fundCollection = client.db("BloodDB").collection("fund");
     const blogCollection = client.db("BloodDB").collection("blog");
+    const donorsCollection = client.db("BloodDB").collection("donors");
     //? --------------JWT---------------
     app.post("/jwt", async (req, res) => {
       const user = req.body;
@@ -180,13 +181,10 @@ async function run() {
       res.send(result);
     });
     //------- limit----
-    app.get("/MyDonation", async (req, res) => {
+    app.get("/myDonor", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
-      const cursor = recipientCollection
-        .find(query)
-        .sort({ date: -1 })
-        .limit(3);
+      const cursor = donorCollection.find(query).sort({ date: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -343,6 +341,7 @@ async function run() {
       res.send(result);
     });
     // !--------------------------Donor------------------------------------
+    //  This collection is for those donors who will donate after seeing donation requests.
     app.post("/donor", async (req, res) => {
       const user = req.body;
       const result = await donorCollection.insertOne(user);
@@ -354,16 +353,29 @@ async function run() {
       const result = await donorCollection.find().toArray();
       res.send(result);
     });
-    // !----------------------------------Search Donor--------------------------------
+    //! ----------------------All Donar----------------------------
+    // This collection is for becoming a donor by clicking the "Become a Donor" button
+    app.post("/donors", async (req, res) => {
+      const user = req.body;
+      const result = await donorsCollection.insertOne(user);
+      res.send(result);
+    });
+
+    // !----------------------------------Search Donors--------------------------------
     app.get("/searchDonor", async (req, res) => {
-      const { District, Upazila, Blood } = req.query;
+      const { district, upazila, bloodGroup } = req.query;
       const query = {};
-      if (District) query.District = District;
-      if (Upazila) query.Upazila = Upazila;
-      if (Blood) query.Blood = Blood;
-      const donors = await donorCollection.find(query).toArray();
+
+      if (district)
+        query.district = { $regex: new RegExp(district.trim(), "i") };
+      if (upazila) query.upazila = { $regex: new RegExp(upazila.trim(), "i") };
+      if (bloodGroup)
+        query.bloodGroup = { $regex: new RegExp(bloodGroup.trim(), "i") };
+
+      const donors = await donorsCollection.find(query).toArray();
       res.json(donors);
     });
+
     // !--------------------------fund------------------------------------
     app.post("/fund", async (req, res) => {
       const fund = req.body;
