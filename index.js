@@ -376,32 +376,21 @@ async function run() {
       res.json(donors);
     });
 
-    // !--------------------------fund------------------------------------
+    // !--------------------------fund-------------------------------------
     app.post("/fund", async (req, res) => {
       const fund = req.body;
       const result = await fundCollection.insertOne(fund);
       res.send(result);
     });
-    // all-get
+    // ------------all-get--------
     app.get("/fund", async (req, res) => {
       const result = await fundCollection.find().toArray();
       res.send(result);
     });
-
-    //?----------------------------------------------------------------------------------------
-    // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
-    // console.log(
-    //   "Pinged your deployment. You successfully connected to MongoDB!"
-    // );
   } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
   }
 }
 run().catch(console.dir);
-
-// ?----------------------------------------------------------------------------------------------
 
 app.get("/", (req, res) => {
   res.send("Hello World");
